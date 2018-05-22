@@ -60,6 +60,12 @@ type ThreeDcStrategy struct{
 type ThreeRacksStrategy struct{
 }
 
+type AllSsdStrategy struct{	
+}
+
+type OneSsdStrategy struct{	
+}
+
 func (stg ThreeDcStrategy)GetNewRegion(cluster Cluster, place Placement) error{
 	for 
 }
@@ -99,8 +105,31 @@ func (stg ThreeRacksStrategy)Satisfied(cluster Cluster, regin Region) bool {
 
 func (stg AllSsdStrategy)Satisfied(stores []Store, regin Region){
 	for _, r := range(regin.Replicas){
-		if
+		store, ok := cluster.Stores[r]
+		if !ok {
+			return false
+		}
+		if(store.Labels["storagetype"] != "ssd"){
+			return false
+		}
+	}
+	return true
 }
+
+func (stg OneSsdStrategy)Satisfied(stores []Store, regin Region){
+	ssdnum := 0
+	for _, r := range(regin.Replicas){
+		store, ok := cluster.Stores[r]
+		if !ok {
+			return false
+		}
+		if(store.Labels["storagetype"] == "ssd"){
+			ssdnum += 1
+		}
+	}
+	return ssdnum == 1
+}
+
 func Check(stores []Store, region Region, strategy Strategy) Region{
 
 }
