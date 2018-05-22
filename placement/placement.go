@@ -1,13 +1,16 @@
 package main
 
 
+const {
+	RegionMaxSize = 64 //64 MB
+}
+
 //Store define a server that contains a tikv server process
 type Store struct{
 	ID int
 	RackID int
 	DcID int
 	Regions map[int]bool //used as set
-	RegionNum int
 	Labels map[string]string //key should be mem,cpu,storage and so on
 }
 
@@ -19,7 +22,7 @@ type Rack struct{
 }
 
 func (r *Rack)GetBestStore() *Store{
-	
+
 }
 
 //Datacenter define a datacenter which have some racks
@@ -31,6 +34,7 @@ type Datacenter struct{
 //Cluster define overview of all datacenters
 type Cluster struct{
 	Dcs map[int]Datacenter
+	Stores map[int]Store
 }
 
 var cluster Cluster
@@ -51,18 +55,52 @@ type Strategy interface{
 }
 
 type ThreeDcStrategy struct{
-
 }
 
-func (stg ThreeDcStrategy)GetNewRegion(stores []Store, place Placement) error{
+type ThreeRacksStrategy struct{
+}
+
+func (stg ThreeDcStrategy)GetNewRegion(cluster Cluster, place Placement) error{
 	for 
 }
 
 
 
+func (stg ThreeDcStrategy)Satisfied(cluster Cluster, regin Region) bool {
+	dcs := map[int]bool
+	for _, r := range(regin.Replicas){
+		store, ok := cluster.Stores[r]
+		if !ok {
+			return false
+		}
+		dcs[store.DcID] = true
+	}
+	if(len(dcs) == 3){
+		return true
+	}
+	return false
+}
 
 
+func (stg ThreeRacksStrategy)Satisfied(cluster Cluster, regin Region) bool {
+	racks := map[int]bool
+	for _, r := range(regin.Replicas){
+		store, ok := cluster.Stores[r]
+		if !ok {
+			return false
+		}
+		racks[store.RackID] = true
+	}
+	if(len(racks) == 3){
+		return true
+	}
+	return false
+}
 
+func (stg AllSsdStrategy)Satisfied(stores []Store, regin Region){
+	for _, r := range(regin.Replicas){
+		if
+}
 func Check(stores []Store, region Region, strategy Strategy) Region{
 
 }
